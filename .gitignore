@@ -1,0 +1,25 @@
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python virtual environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# IDE settings
+.idea/
+.vscode/
+
+# Generated data
+data/
+*.parquet
+*.csv
+
+# Generated JSON data (keep package.json)
+*.json
+!package.json
