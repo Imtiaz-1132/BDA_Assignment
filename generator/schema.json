@@ -1,0 +1,93 @@
+
+{
+  "schema_version": "1.0",
+  "dataset": "synthetic_encounters",
+  "description": "Synthetic disease-surveillance encounters for Bangladesh, 2021-2025",
+  "fields": [
+    {
+      "name": "encounter_id",
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    {
+      "name": "patient_id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "facility_id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "district_id",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "onset_date",
+      "type": "date",
+      "format": "YYYY-MM-DD",
+      "required": true
+    },
+    {
+      "name": "report_date",
+      "type": "date",
+      "format": "YYYY-MM-DD",
+      "required": true
+    },
+    {
+      "name": "age",
+      "type": "integer",
+      "required": true,
+      "expected_range": [0, 120],
+      "invalid_values_allowed_for_quality_testing": true
+    },
+    {
+      "name": "sex",
+      "type": "string",
+      "required": true,
+      "allowed_values": ["Male", "Female", "Other", "Unknown"]
+    },
+    {
+      "name": "icd10_code",
+      "type": "string",
+      "required": true,
+      "examples": ["A90", "A91", "A00", "A09", "J10", "J11", "B50", "B54"]
+    },
+    {
+      "name": "lab_confirmed",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "name": "admission",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "name": "outcome",
+      "type": "string",
+      "required": true,
+      "allowed_values": ["Recovered", "Admitted", "Deceased", "Unknown"]
+    }
+  ],
+  "validation_rules": [
+    "encounter_id must be unique in the generated source data",
+    "onset_date must not be later than report_date",
+    "dates must fall within the configured simulation period",
+    "facility_id must be checked against the facility registry",
+    "district_id must be a valid Bangladesh district identifier",
+    "age outside the expected range must be flagged by data-quality checks",
+    "ICD-10 codes must be checked against the configured disease-code groups"
+  ],
+  "generation_requirements": {
+    "start_date": "2021-01-01",
+    "end_date": "2025-12-31",
+    "district_count": 64,
+    "scale_factor_1_minimum_encounters": 25000000,
+    "deterministic_seed": true,
+    "ground_truth_outbreaks_separate": true
+  }
+}
