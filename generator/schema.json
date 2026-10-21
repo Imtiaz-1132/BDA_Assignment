@@ -1,6 +1,6 @@
 
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "dataset": "synthetic_encounters",
   "description": "Synthetic disease-surveillance encounters for Bangladesh, 2021-2025",
   "fields": [
@@ -8,7 +8,8 @@
       "name": "encounter_id",
       "type": "string",
       "required": true,
-      "unique": true
+      "unique": false,
+      "quality_rule": "Detect and quarantine duplicate encounter IDs during data-quality processing"
     },
     {
       "name": "patient_id",
@@ -18,12 +19,14 @@
     {
       "name": "facility_id",
       "type": "string",
-      "required": true
+      "required": true,
+      "quality_rule": "Validate against the facility registry; quarantine unknown facility references"
     },
     {
       "name": "district_id",
       "type": "string",
-      "required": true
+      "required": true,
+      "quality_rule": "Validate against the configured Bangladesh district registry"
     },
     {
       "name": "onset_date",
@@ -42,19 +45,38 @@
       "type": "integer",
       "required": true,
       "expected_range": [0, 120],
-      "invalid_values_allowed_for_quality_testing": true
+      "invalid_values_allowed_for_quality_testing": true,
+      "quality_rule": "Flag ages outside 0-120 and quarantine invalid values"
     },
     {
       "name": "sex",
       "type": "string",
       "required": true,
-      "allowed_values": ["Male", "Female", "Other", "Unknown"]
+      "allowed_values": [
+        "Male",
+        "Female",
+        "Other",
+        "Unknown"
+      ]
     },
     {
       "name": "icd10_code",
       "type": "string",
       "required": true,
-      "examples": ["A90", "A91", "A00", "A09", "J10", "J11", "B50", "B54"]
+      "examples": [
+        "A90",
+        "A91",
+        "A00",
+        "A09",
+        "J10",
+        "J11",
+        "B50",
+        "B51",
+        "B52",
+        "B53",
+        "B54"
+      ],
+      "quality_rule": "Validate codes against configured disease-code groups"
     },
     {
       "name": "lab_confirmed",
@@ -70,24 +92,40 @@
       "name": "outcome",
       "type": "string",
       "required": true,
-      "allowed_values": ["Recovered", "Admitted", "Deceased", "Unknown"]
+      "allowed_values": [
+        "Recovered",
+        "Admitted",
+        "Deceased",
+        "Unknown"
+      ]
     }
   ],
   "validation_rules": [
-    "encounter_id must be unique in the generated source data",
+    "Duplicate encounter IDs must be detected, counted, and quarantined during data-quality processing",
+    "Required fields must not be null or empty",
     "onset_date must not be later than report_date",
-    "dates must fall within the configured simulation period",
+    "onset_date and report_date must fall within the configured simulation period",
+    "reporting delay must be between 0 and 21 days",
     "facility_id must be checked against the facility registry",
-    "district_id must be a valid Bangladesh district identifier",
+    "district_id must match a valid configured Bangladesh district identifier",
     "age outside the expected range must be flagged by data-quality checks",
-    "ICD-10 codes must be checked against the configured disease-code groups"
+    "sex must match one of the configured allowed values",
+    "outcome must match one of the configured allowed values",
+    "ICD-10 codes must be checked against the configured disease-code groups",
+    "Boolean fields must contain valid boolean values"
   ],
   "generation_requirements": {
     "start_date": "2021-01-01",
     "end_date": "2025-12-31",
     "district_count": 64,
+    "facility_count": 600,
     "scale_factor_1_minimum_encounters": 25000000,
     "deterministic_seed": true,
-    "ground_truth_outbreaks_separate": true
+    "ground_truth_outbreaks_separate": true,
+    "target_duplicate_record_rate": 0.02,
+    "target_orphan_facility_rate": 0.005,
+    "target_invalid_age_rate": 0.01,
+    "maximum_reporting_delay_days": 21,
+    "minimum_outbreaks": 30
   }
 }
