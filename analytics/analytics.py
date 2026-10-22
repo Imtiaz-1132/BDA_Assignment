@@ -27,7 +27,7 @@ def detect_outbreaks(data, window=4, threshold=2.0):
 
 
 def forecast_next_week(data):
-    """Estimate next-week cases using the mean of the latest four weeks."""
+    """Forecast next-week cases from the latest four valid observations."""
     required = {"epi_week_start", "district_id", "disease", "case_count"}
     if not required.issubset(data.columns):
         raise ValueError(f"Missing columns: {sorted(required - set(data.columns))}")
@@ -39,15 +39,19 @@ def forecast_next_week(data):
 
     rows = []
     for (district, disease), group in df.groupby(["district_id", "disease"]):
-        recent = group.tail(4)
+        recent = group.dropna(subset=["case_count"]).tail(4)
+        forecast = (
+            max(0, round(recent["case_count"].mean()))
+            if not recent.empty
+            else 0
+        )
         rows.append({
             "district_id": district,
             "disease": disease,
-            "forecast_cases": max(0, round(recent["case_count"].mean())),
+            "forecast_cases": forecast,
             "based_on_weeks": len(recent),
         })
     return pd.DataFrame(rows)
-
 
 def estimate_resource_demand(forecasts, resources_per_case=0.2):
     """Estimate resource units from forecast case counts."""
