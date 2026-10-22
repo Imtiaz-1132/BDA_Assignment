@@ -31,6 +31,9 @@ DISEASE_CODES = {
     "diarrhoea": ["A00", "A09"],
     "influenza": ["J10", "J11"],
     "malaria": ["B50", "B51", "B52", "B53", "B54"],
+    # Synthetic placeholder code for the simulated novel-respiratory disease.
+    # This is not a claim that the code represents a real assigned diagnosis.
+    "novel_respiratory": ["R99"],
 }
 
 # Required injected outbreaks

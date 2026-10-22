@@ -23,3 +23,12 @@ data/
 # Generated JSON data (keep package.json)
 *.json
 !package.json
+
+# Spark-generated local warehouse
+spark-warehouse/
+
+# Local test and build artifacts
+.pytest_cache/
+
+# Local recovery copies; do not commit
+project_cleanup_backup/
