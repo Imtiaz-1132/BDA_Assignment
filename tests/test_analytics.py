@@ -55,3 +55,24 @@ def test_negative_resource_supply_rejected():
     })
     with pytest.raises(ValueError):
         optimize_allocation(demand, available_resources=-1)
+
+
+
+def test_forecast_ignores_missing_case_counts():
+    data = sample_data()
+    data.loc[data.index[-1], "case_count"] = float("nan")
+
+    result = forecast_next_week(data)
+
+    assert result.iloc[0]["forecast_cases"] == 11
+    assert result.iloc[0]["based_on_weeks"] == 4
+
+
+def test_forecast_handles_all_missing_case_counts():
+    data = sample_data()
+    data["case_count"] = float("nan")
+
+    result = forecast_next_week(data)
+
+    assert result.iloc[0]["forecast_cases"] == 0
+    assert result.iloc[0]["based_on_weeks"] == 0
