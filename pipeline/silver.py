@@ -208,6 +208,97 @@ def process_silver(spark, bronze_dir: Path, output_dir: Path, batch_id: str):
     print(json.dumps(quality, indent=2))
 
 
+
+def process_population_silver(spark, bronze_dir: Path, output_dir: Path, batch_id: str):
+    """Validate population data and write Silver Parquet output."""
+    from pyspark.sql import functions as F
+
+    source_path = bronze_dir / "district_population" / f"batch_id={batch_id}"
+    if not source_path.exists():
+        print(f"No population Bronze data for batch {batch_id}; skipping.")
+        return
+
+    df = spark.read.parquet(str(source_path))
+
+    required = {
+        "district", "year", "sex", "age_group", "population",
+        "_batch_id", "_source_load_time", "source_checksum_sha256",
+    }
+    missing = sorted(required - set(df.columns))
+    if missing:
+        raise ValueError(f"Population data missing required columns: {missing}")
+
+    checked = (
+        df.withColumn("district", F.trim(F.col("district")))
+        .withColumn("year", F.col("year").cast("int"))
+        .withColumn("sex", F.lower(F.trim(F.col("sex"))))
+        .withColumn("age_group", F.trim(F.col("age_group")))
+        .withColumn("population", F.col("population").cast("double"))
+    )
+
+    valid = (
+        F.col("district").isNotNull()
+        & (F.col("district") != "")
+        & F.col("year").isNotNull()
+        & F.col("population").isNotNull()
+        & (F.col("population") >= 0)
+        & F.col("sex").isin("female", "male", "total")
+        & F.col("age_group").isNotNull()
+        & (F.col("age_group") != "")
+    )
+
+    good = checked.filter(valid)
+    bad = (
+        checked.filter(~valid)
+        .withColumn(
+            "quarantine_reason",
+            F.concat_ws(
+                ",",
+                F.when(
+                    F.col("district").isNull() | (F.col("district") == ""),
+                    "invalid_district",
+                ),
+                F.when(F.col("year").isNull(), "invalid_year"),
+                F.when(
+                    F.col("population").isNull() | (F.col("population") < 0),
+                    "invalid_population",
+                ),
+                F.when(
+                    ~F.col("sex").isin("female", "male", "total"),
+                    "invalid_sex",
+                ),
+                F.when(
+                    F.col("age_group").isNull() | (F.col("age_group") == ""),
+                    "invalid_age_group",
+                ),
+            ),
+        )
+    )
+
+    target = output_dir / f"batch_id={batch_id}"
+    good.write.mode("overwrite").parquet(str(target / "population"))
+    bad.write.mode("overwrite").parquet(str(target / "population_quarantine"))
+
+    input_rows = checked.count()
+    silver_rows = good.count()
+    quarantined_rows = bad.count()
+
+    report = {
+        "batch_id": batch_id,
+        "dataset": "district_population",
+        "input_rows": input_rows,
+        "silver_rows": silver_rows,
+        "quarantined_rows": quarantined_rows,
+        "pass_rate": round(silver_rows / input_rows, 6) if input_rows else 0.0,
+        "quarantine_rate": round(quarantined_rows / input_rows, 6) if input_rows else 0.0,
+    }
+
+    target.mkdir(parents=True, exist_ok=True)
+    (target / "population_quality_report.json").write_text(
+        json.dumps(report, indent=2), encoding="utf-8"
+    )
+    print(json.dumps(report, indent=2))
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bronze-dir", type=Path, default=Path("data/lakehouse/bronze"))
