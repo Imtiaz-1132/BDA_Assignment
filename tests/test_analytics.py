@@ -6,6 +6,7 @@ from analytics.analytics import (
     forecast_next_week,
     estimate_resource_demand,
     optimize_allocation,
+    evaluate_forecast_accuracy,
 )
 
 
@@ -76,3 +77,25 @@ def test_forecast_handles_all_missing_case_counts():
 
     assert result.iloc[0]["forecast_cases"] == 0
     assert result.iloc[0]["based_on_weeks"] == 0
+
+
+def test_forecast_accuracy_metrics():
+    result = evaluate_forecast_accuracy([10, 20, 30], [12, 18, 33])
+
+    assert result["mae"] == pytest.approx(7 / 3)
+    assert result["rmse"] == pytest.approx((17 / 3) ** 0.5)
+
+
+def test_forecast_accuracy_rejects_different_lengths():
+    with pytest.raises(ValueError):
+        evaluate_forecast_accuracy([10, 20], [10])
+
+
+def test_forecast_accuracy_rejects_empty_inputs():
+    with pytest.raises(ValueError):
+        evaluate_forecast_accuracy([], [])
+
+
+def test_forecast_accuracy_rejects_negative_cases():
+    with pytest.raises(ValueError):
+        evaluate_forecast_accuracy([10, -1], [9, 2])
