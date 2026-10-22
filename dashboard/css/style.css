@@ -1,0 +1,117 @@
+﻿* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, sans-serif; background: #f3f6fb; color: #172033; }
+header { padding: 22px 5%; background: #12304a; color: white; }
+header h1 { margin: 0; }
+header p { margin-bottom: 0; color: #d5e5f4; }
+main { max-width: 1440px; margin: auto; padding: 24px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px; background: white; border-radius: 10px; }
+select, button { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font: inherit; }
+button { background: #123f65; color: white; cursor: pointer; }
+#dataStatus { color: #53657a; font-size: 14px; }
+.metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin: 20px 0; }
+.metrics article, .panel { min-width: 0; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 8px #1020300d; }
+.metrics h2, .panel h2 { margin-top: 0; font-size: 16px; }
+.metrics p { font-size: 30px; font-weight: bold; margin-bottom: 0; }
+.charts { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.panel svg { width: 100%; height: auto; display: block; }
+.axis text { font-size: 11px; fill: #53657a; }
+.axis path, .axis line { stroke: #d8e0e9; }
+.chart-line { fill: none; stroke: #147d92; stroke-width: 2.5; }
+.bar { fill: #3385b5; cursor: pointer; }
+.bar:hover { fill: #145374; }
+.empty-message { color: #64748b; }
+footer { text-align: center; color: #64748b; padding: 24px 0; font-size: 12px; }
+@media(max-width:760px) { .charts, .metrics { grid-template-columns: 1fr; } main { padding: 14px; } }
+
+/* Bangladesh district map */
+.map-panel { grid-column: 1 / -1; }
+.map-panel svg { width: 100%; height: auto; display: block; }
+.map-panel .district {
+  stroke: #ffffff;
+  stroke-width: 0.7;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+.map-panel .district:hover {
+  stroke: #172b4d;
+  stroke-width: 1.8;
+  opacity: 0.85;
+}
+.map-help { color: #536273; font-size: 0.9rem; }
+
+/* Improved Bangladesh district map sizing */
+.map-panel {
+    overflow: hidden;
+}
+
+.map-panel svg {
+    display: block;
+    width: 100%;
+    max-width: 620px;
+    height: auto;
+    max-height: 430px;
+    margin: 12px auto;
+}
+
+.map-panel .district {
+    stroke: #ffffff;
+    stroke-width: 0.7px;
+}
+
+.map-panel .district:hover {
+    stroke: #1e293b;
+    stroke-width: 1.5px;
+    cursor: pointer;
+}
+
+/* Compact dashboard layout */
+.charts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    align-items: start;
+}
+
+.charts .panel {
+    min-width: 0;
+}
+
+.map-panel {
+    grid-column: 1 / -1;
+    padding: 12px;
+    overflow: hidden;
+}
+
+.map-panel svg {
+    display: block;
+    width: 100%;
+    max-width: 460px;
+    max-height: 280px;
+    height: auto;
+    margin: 8px auto;
+}
+
+.map-panel .district {
+    stroke: #ffffff;
+    stroke-width: 0.7px;
+}
+
+.map-panel .district:hover {
+    stroke: #1e293b;
+    stroke-width: 1.5px;
+}
+
+@media (max-width: 768px) {
+    .charts {
+        grid-template-columns: 1fr;
+    }
+
+    .map-panel {
+        grid-column: auto;
+    }
+
+    .map-panel svg {
+        max-width: 100%;
+        max-height: 260px;
+    }
+}

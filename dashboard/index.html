@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EpiScope | Disease Surveillance</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/d3.v7.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>EpiScope</h1>
+    <p>Disease Surveillance Dashboard</p>
+  </header>
+  <main>
+    <section class="toolbar">
+      <label for="diseaseFilter">Disease</label>
+      <select id="diseaseFilter"><option value="all">All diseases</option></select>
+      <label for="districtFilter">District</label>
+      <select id="districtFilter"><option value="all">All districts</option></select>
+      <button id="resetButton" type="button">Reset filters</button>
+    </section>
+    <p id="dataStatus" role="status">Loading dashboard data...</p>
+    <section class="metrics">
+      <article><h2>Total reported cases</h2><p id="totalCases">—</p></article>
+      <article><h2>Districts represented</h2><p id="districtCount">—</p></article>
+      <article><h2>Disease categories</h2><p id="diseaseCount">—</p></article>
+    </section>
+    <section class="charts">
+      <article class="panel"><h2>Weekly disease trend</h2><div id="trendChart"></div></article>
+      <article class="panel"><h2>Cases by district</h2><div id="districtChart"></div></article>
+    </section>
+    <footer>EpiScope · Epidemiological surveillance</footer>
+  </main>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
+
