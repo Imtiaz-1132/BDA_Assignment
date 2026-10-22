@@ -1,4 +1,4 @@
-"""Silver validation, quarantine, privacy hashing, and quality reporting."""
+﻿"""Silver validation, quarantine, privacy hashing, and quality reporting."""
 
 import argparse
 import hashlib
@@ -36,6 +36,9 @@ def process_silver(spark, bronze_dir: Path, output_dir: Path, batch_id: str):
     if missing:
         raise ValueError(f"Missing encounter columns: {missing}")
 
+    # Normalize admission field for Gold processing.
+    if "admitted" not in encounters.columns and "admission" in encounters.columns:
+        encounters = encounters.withColumnRenamed("admission", "admitted")
     valid_facilities = facilities.select("facility_id").distinct()
 
     district_registry = DATA_DIR / "geography" / "district_centroids.csv"
@@ -319,3 +322,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
