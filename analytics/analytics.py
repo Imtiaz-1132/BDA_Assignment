@@ -95,3 +95,33 @@ def optimize_allocation(demand, available_resources):
     result["allocated_resources"] = allocations
     result["unmet_demand"] = result["estimated_demand"] - result["allocated_resources"]
     return result
+
+
+
+def evaluate_forecast_accuracy(actual, predicted):
+    """Evaluate forecasts using MAE and RMSE."""
+    import math
+
+    try:
+        actual_values = [float(value) for value in actual]
+        predicted_values = [float(value) for value in predicted]
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Actual and predicted values must be numeric sequences") from exc
+
+    if not actual_values or not predicted_values:
+        raise ValueError("Actual and predicted values must not be empty")
+    if len(actual_values) != len(predicted_values):
+        raise ValueError("Actual and predicted sequences must have equal lengths")
+    if not all(math.isfinite(value) for value in actual_values + predicted_values):
+        raise ValueError("Values must be finite numbers")
+    if any(value < 0 for value in actual_values + predicted_values):
+        raise ValueError("Case counts must be non-negative")
+
+    errors = [
+        actual_value - predicted_value
+        for actual_value, predicted_value in zip(actual_values, predicted_values)
+    ]
+    mae = sum(abs(error) for error in errors) / len(errors)
+    rmse = math.sqrt(sum(error ** 2 for error in errors) / len(errors))
+
+    return {"mae": mae, "rmse": rmse}
