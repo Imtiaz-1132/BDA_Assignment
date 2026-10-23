@@ -1,4 +1,4 @@
-import json
+﻿import json
 import os
 from pathlib import Path
 
@@ -25,6 +25,24 @@ def test_silver_module_can_be_imported():
     assert callable(process_silver)
 
 
+
+@pytest.fixture
+def district_registry(tmp_path, monkeypatch):
+    from pipeline import silver
+
+    data_dir = tmp_path / "data"
+    geography_dir = data_dir / "geography"
+    geography_dir.mkdir(parents=True)
+
+    registry = geography_dir / "district_centroids.csv"
+    registry.write_text(
+        "district_id,district_name,latitude,longitude\n"
+        "D001,Bagerhat,22.369841,89.739569\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(silver, "DATA_DIR", data_dir)
+
 def test_silver_requires_patient_id_salt(monkeypatch, tmp_path):
     from pipeline.silver import process_silver
 
@@ -44,7 +62,7 @@ def test_silver_requires_patient_id_salt(monkeypatch, tmp_path):
         spark.stop()
 
 
-def test_silver_validates_quarantines_and_hashes(spark, tmp_path, monkeypatch):
+def test_silver_validates_quarantines_and_hashes(spark, tmp_path, monkeypatch, district_registry):
     from pipeline.silver import process_silver
 
     monkeypatch.setenv("PATIENT_ID_SALT", "test-only-salt-that-is-long-enough-123")
@@ -115,7 +133,7 @@ def test_silver_validates_quarantines_and_hashes(spark, tmp_path, monkeypatch):
     assert report["quarantine_reason_counts_are_non_exclusive"] is True
 
 
-def test_silver_quarantines_unknown_district_and_icd10(spark, tmp_path, monkeypatch):
+def test_silver_quarantines_unknown_district_and_icd10(spark, tmp_path, monkeypatch, district_registry):
     from pipeline.silver import process_silver
 
     monkeypatch.setenv("PATIENT_ID_SALT", "test-only-salt-that-is-long-enough-123")
@@ -170,3 +188,4 @@ def test_silver_quarantines_unknown_district_and_icd10(spark, tmp_path, monkeypa
     assert "E101" not in reasons
     assert "patient_id" not in quarantine.columns
     assert "age_years" not in quarantine.columns
+
