@@ -1,4 +1,4 @@
-
+﻿
 """Automated tests for EpiScope synthetic data generators."""
 
 import csv
@@ -17,7 +17,7 @@ def read_csv(path: Path):
 
 def test_encounter_generator(tmp_path):
     """Check encounter schema, dates, and injected quality issues."""
-    generate_encounters(tmp_path, scale_factor=0.001, seed=42)
+    generate_encounters(tmp_path, scale_factor=0.001, seed=42, weather_path=None)
 
     path = tmp_path / "encounters.csv"
     rows = read_csv(path)
@@ -98,3 +98,4 @@ def test_resource_generator(tmp_path):
         assert 0 <= occupied <= available
         assert saline >= 0
         assert kits >= 0
+
